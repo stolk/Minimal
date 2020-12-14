@@ -1,0 +1,111 @@
+CXX=clang++-10
+CC=clang-10
+
+ODEPREFIX=/opt/ode-master-gimpact
+
+BASEPREFIX=../GBase/src
+GAMEPREFIX=src
+
+DBLUNTPREFIX=../../src/dutch-blunt/src
+
+STEAMPREFIX=$(HOME)/src/steamsdk
+#SDLPREFIX=$(HOME)
+SDLPREFIX=/usr
+
+OPTIM=-O0 -DDEBUG
+#OPTIM=-DDEBUG -DdDEBUG
+
+CFLAGS=\
+  -DAPPVER=0.10 \
+  -DUSECOREPROFILE \
+  -DNOUSESTEAM \
+  -DXWIN -DLANDSCAPE \
+  -IModels.game/geom \
+  -I$(BASEPREFIX) \
+  -I$(GAMEPREFIX) \
+  -I$(DBLUNTPREFIX) \
+  -I$(STEAMPREFIX)/public \
+  `$(ODEPREFIX)/bin/ode-config --cflags` \
+  `$(SDLPREFIX)/bin/sdl2-config --cflags` \
+  -g -Wall -Wno-missing-braces \
+  -MMD -MP \
+  $(OPTIM)
+
+CXXFLAGS=\
+  $(CFLAGS) \
+  -std=c++0x \
+
+BASEOBJS=\
+  $(BASEPREFIX)/nfy.o \
+  $(BASEPREFIX)/logx.o \
+  $(BASEPREFIX)/kv.o \
+  $(BASEPREFIX)/pidc.o \
+  $(BASEPREFIX)/quad.o \
+  $(BASEPREFIX)/glpr.o \
+  $(BASEPREFIX)/offsc.o \
+  $(BASEPREFIX)/shdw.o \
+  $(BASEPREFIX)/camera.o \
+  $(BASEPREFIX)/light.o \
+  $(BASEPREFIX)/geomdb.o \
+  $(BASEPREFIX)/meshdb.o \
+  $(BASEPREFIX)/dbd.o \
+  $(BASEPREFIX)/odb.o \
+  $(BASEPREFIX)/txdb_dlo.o \
+
+DBLUNTOBJS=\
+  $(DBLUNTPREFIX)/dblunt.o
+
+GAMEOBJS=\
+  $(GAMEPREFIX)/odb_spawn_misc.o \
+  $(GAMEPREFIX)/view.o \
+  $(GAMEPREFIX)/ctrl.o \
+  $(GAMEPREFIX)/ctrl_sdof.o \
+  $(GAMEPREFIX)/wld.o \
+  $(GAMEPREFIX)/text.o \
+  $(GAMEPREFIX)/collresp.o \
+  $(GAMEPREFIX)/toast.o \
+
+
+LIBS=\
+  -L. \
+  -L$(STEAMPREFIX)/redistributable_bin/linux64 \
+  `$(ODEPREFIX)/bin/ode-config --libs` \
+  `pkg-config --libs ccd` \
+  `$(SDLPREFIX)/bin/sdl2-config --static-libs` \
+  -L/usr/local/lib \
+  -lGLU -lX11 -lpthread -lXrandr -lXcursor -lXi -lXxf86vm -lrt \
+  -lGL \
+  -ldl \
+  -lm
+
+#  -lsteam_api \
+
+
+all: minimal3d
+
+minimal3d:$(GAMEPREFIX)/sdlmain.o libbase.a libgame.a libdblunt.a 
+	$(CXX) -ominimal3d $(GAMEPREFIX)/sdlmain.o -lgame -ldblunt -lbase $(LIBS)
+
+libbase.a:$(BASEOBJS)
+	ar rcsv $*.a $(BASEOBJS)
+
+libdblunt.a:$(DBLUNTOBJS)
+	ar rcsv $*.a $(DBLUNTOBJS)
+
+libgame.a:$(GAMEOBJS)
+	ar rcsv $*.a $(GAMEOBJS)
+
+clean:
+	rm -f minimal
+	rm -f *.a
+	rm -f $(BASEOBJS)
+	rm -f $(GAMEOBJS)
+	rm -f $(DBLUNTOBJS)
+	rm -f $(GAMEPREFIX)/sdlmain.o
+
+
+
+-include $(BASEOBJS:.o=.d)
+-include $(GAMEOBJS:.o=.d)
+-include $(BASEOBJS:.o=.d)
+
