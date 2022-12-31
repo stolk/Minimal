@@ -1,7 +1,7 @@
-CXX=clang++-10
-CC=clang-10
+CXX=clang++-14
+CC=clang-14
 
-ODEPREFIX=/opt/ode-master-gimpact
+ODEPREFIX=/opt/ode-0.16.2-gimpact
 
 BASEPREFIX=../GBase/src
 GAMEPREFIX=src
@@ -10,7 +10,8 @@ DBLUNTPREFIX=../../src/dutch-blunt/src
 
 STEAMPREFIX=$(HOME)/src/steamsdk
 #SDLPREFIX=$(HOME)
-SDLPREFIX=/usr
+#SDLPREFIX=/usr
+SDLPREFIX=/opt/SDL2
 
 OPTIM=-O0 -DDEBUG
 #OPTIM=-DDEBUG -DdDEBUG
@@ -73,7 +74,7 @@ LIBS=\
   `pkg-config --libs ccd` \
   `$(SDLPREFIX)/bin/sdl2-config --static-libs` \
   -L/usr/local/lib \
-  -lGLU -lX11 -lpthread -lXrandr -lXcursor -lXi -lXxf86vm -lrt \
+  -lX11 -lpthread -lXrandr -lXcursor -lXi -lXxf86vm -lrt \
   -lGL \
   -ldl \
   -lm
